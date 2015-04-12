@@ -17,5 +17,5 @@ HTTP/1.1 200 OK
 
 Hello, World!
 """
-    client_connection.sendall(bytes(http_response, 'UTF-8'))
+    client_connection.sendall(http_response.encode('utf-8'))
     client_connection.close()

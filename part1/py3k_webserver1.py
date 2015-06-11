@@ -16,6 +16,6 @@ while True:
 HTTP/1.1 200 OK
 
 Hello, World!
-""".encode('utf-8')
-    client_connection.sendall(http_response)
+"""
+    client_connection.sendall(http_response.encode('utf-8'))
     client_connection.close()

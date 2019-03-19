@@ -20,11 +20,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SECRET_KEY = 'h#!izko_ejn@&0g@a#yu$tpuh-a=v$vvcfq5p*y#@2rzfcojn7'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False 
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [u'gyt-mac.local'] # replace the content by your host name
 
 
 # Application definition

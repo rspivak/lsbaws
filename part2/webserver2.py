@@ -1,8 +1,9 @@
-# Tested with Python 2.7.9, Linux & Mac OS X
+try:
+    from StringIO import StringIO # Python 2
+except:
+    from io import StringIO # Python 3
 import socket
-import StringIO
 import sys
-
 
 class WSGIServer(object):
 
@@ -62,7 +63,7 @@ class WSGIServer(object):
         self.finish_response(result)
 
     def parse_request(self, text):
-        request_line = text.splitlines()[0]
+        request_line = text.splitlines()[0].decode('utf-8')
         request_line = request_line.rstrip('\r\n')
         # Break down the request line into components
         (self.request_method,  # GET
@@ -79,7 +80,7 @@ class WSGIServer(object):
         # Required WSGI variables
         env['wsgi.version']      = (1, 0)
         env['wsgi.url_scheme']   = 'http'
-        env['wsgi.input']        = StringIO.StringIO(self.request_data)
+        env['wsgi.input']        = StringIO(self.request_data.decode('utf-8'))
         env['wsgi.errors']       = sys.stderr
         env['wsgi.multithread']  = False
         env['wsgi.multiprocess'] = False
@@ -111,13 +112,14 @@ class WSGIServer(object):
                 response += '{0}: {1}\r\n'.format(*header)
             response += '\r\n'
             for data in result:
-                response += data
+                response += data.decode('utf-8')
             # Print formatted response data a la 'curl -v'
             print(''.join(
                 '> {line}\n'.format(line=line)
                 for line in response.splitlines()
             ))
-            self.client_connection.sendall(response)
+            #self.client_connection.sendall(bytes(response, 'UTF-8'))
+            self.client_connection.sendall(response.encode('utf-8'))
         finally:
             self.client_connection.close()
 

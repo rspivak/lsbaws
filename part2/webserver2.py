@@ -1,6 +1,6 @@
-# Tested with Python 2.7.9, Linux & Mac OS X
+# Tested with Python 3.7+ (Mac OS X)
+import io
 import socket
-import StringIO
 import sys
 
 
@@ -42,11 +42,11 @@ class WSGIServer(object):
             self.handle_one_request()
 
     def handle_one_request(self):
-        self.request_data = request_data = self.client_connection.recv(1024)
+        request_data = self.client_connection.recv(1024)
+        self.request_data = request_data = request_data.decode('utf-8')
         # Print formatted request data a la 'curl -v'
         print(''.join(
-            '< {line}\n'.format(line=line)
-            for line in request_data.splitlines()
+            f'< {line}\n' for line in request_data.splitlines()
         ))
 
         self.parse_request(request_data)
@@ -79,7 +79,7 @@ class WSGIServer(object):
         # Required WSGI variables
         env['wsgi.version']      = (1, 0)
         env['wsgi.url_scheme']   = 'http'
-        env['wsgi.input']        = StringIO.StringIO(self.request_data)
+        env['wsgi.input']        = io.StringIO(self.request_data)
         env['wsgi.errors']       = sys.stderr
         env['wsgi.multithread']  = False
         env['wsgi.multiprocess'] = False
@@ -94,7 +94,7 @@ class WSGIServer(object):
     def start_response(self, status, response_headers, exc_info=None):
         # Add necessary server headers
         server_headers = [
-            ('Date', 'Tue, 31 Mar 2015 12:54:48 GMT'),
+            ('Date', 'Mon, 15 Jul 2019 5:54:48 GMT'),
             ('Server', 'WSGIServer 0.2'),
         ]
         self.headers_set = [status, response_headers + server_headers]
@@ -106,18 +106,18 @@ class WSGIServer(object):
     def finish_response(self, result):
         try:
             status, response_headers = self.headers_set
-            response = 'HTTP/1.1 {status}\r\n'.format(status=status)
+            response = f'HTTP/1.1 {status}\r\n'
             for header in response_headers:
                 response += '{0}: {1}\r\n'.format(*header)
             response += '\r\n'
             for data in result:
-                response += data
+                response += data.decode('utf-8')
             # Print formatted response data a la 'curl -v'
             print(''.join(
-                '> {line}\n'.format(line=line)
-                for line in response.splitlines()
+                f'> {line}\n' for line in response.splitlines()
             ))
-            self.client_connection.sendall(response)
+            response_bytes = response.encode()
+            self.client_connection.sendall(response_bytes)
         finally:
             self.client_connection.close()
 
@@ -139,5 +139,5 @@ if __name__ == '__main__':
     module = __import__(module)
     application = getattr(module, application)
     httpd = make_server(SERVER_ADDRESS, application)
-    print('WSGIServer: Serving HTTP on port {port} ...\n'.format(port=PORT))
+    print(f'WSGIServer: Serving HTTP on port {PORT} ...\n')
     httpd.serve_forever()
